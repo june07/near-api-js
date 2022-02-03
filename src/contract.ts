@@ -113,19 +113,18 @@ export class Contract {
                         if (args.length && (args.length > 3 || !(isObject(args[0]) || isUint8Array(args[0])))) {
                             throw new PositionalArgsError();
                         }
-
+                        const method = this[resultType === '' ? '_changeMethod' : '_changeMethodRaw'];
                         if(args.length > 1 || !(args[0] && args[0].args)) {
                             const deprecate = depd('contract.methodName(args, gas, amount)');
                             deprecate('use `contract.methodName({ args, gas?, amount?, callbackUrl?, meta? })` instead');
-                            return this[resultType === '' ? '_changeMethod' : '_changeMethodRaw']({
+                            return method({
                                 methodName: baseMethodName,
                                 args: args[0],
                                 gas: args[1],
                                 amount: args[2]
                             });
                         }
-
-                        return this[resultType === '' ? '_changeMethod' : '_changeMethodRaw']({ methodName: baseMethodName, ...args[0] });
+                        return method({ methodName: baseMethodName, ...args[0] });
                     })
                 });
             });
@@ -150,7 +149,6 @@ export class Contract {
     
     private async _changeMethod({ args, methodName, gas, amount, meta, callbackUrl }: ChangeMethodOptions) {
         const result = await this._changeMethodRaw({ args, methodName, gas, amount, meta, callbackUrl });
-
         return getTransactionLastResult(result);
     }
 
